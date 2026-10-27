@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Positions ETS1</title>
+<script src="https://grist.numerique.gouv.fr/grist-plugin-api.js"></script>
+<style>
+:root{--ink:#1d2433;--mute:#667085;--line:#d9dde6;--bg:#f5f6f9;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;padding:12px;font:14px/1.4 system-ui,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg)}
+button,select,input,textarea{font:inherit;color:inherit}
+button,select,input{border:1px solid var(--line);border-radius:6px;background:#fff;padding:6px 10px}
+button{cursor:pointer}button:hover{background:#eef0f5}
+button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.toolbar .sp{flex:1}
+#addbox{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;margin-bottom:10px;background:#fff;border:1px solid var(--line);border-radius:6px}
+#addbox[hidden],#drawer[hidden]{display:none}
+.msg{color:var(--mute);padding:24px;text-align:center}
+.dash{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px}
+.bar{display:flex;height:34px;border-radius:4px;overflow:hidden;background:#eee}
+.seg{display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden}
+.seg.ni{background:repeating-linear-gradient(45deg,#e3e6ec,#e3e6ec 6px,#f0f2f6 6px,#f0f2f6 12px);color:var(--mute)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 0;font-size:12px;color:var(--mute)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.camps{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.camp{border:1px solid var(--line);border-left-width:5px;border-radius:6px;padding:8px 10px}
+.camp b{display:block}
+.tag{display:inline-block;margin-top:4px;padding:1px 8px;border-radius:10px;font-size:12px;font-weight:600}
+.tag.qm{background:#fde4e1;color:#9a1b10}.tag.bl{background:#fff0d6;color:#8a5200}.tag.no{background:#eceef3;color:var(--mute)}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(180px,1fr);gap:10px;overflow-x:auto;align-items:start}
+.col{background:#eceef3;border-top:4px solid var(--c);border-radius:6px;min-height:160px;padding:8px}
+.col.over{outline:2px dashed var(--c);background:#e3e6ee}
+.col h3{margin:0 0 8px;font-size:13px;display:flex;justify-content:space-between;gap:6px}
+.col h3 span{color:var(--mute);font-weight:400;white-space:nowrap}
+.card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:7px 9px;margin-bottom:6px;cursor:grab;display:flex;justify-content:space-between;gap:6px}
+.card:hover{border-color:var(--ink)}
+.card small{color:var(--mute)}
+.card .n{color:#b7791f}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(380px,100%);background:#fff;border-left:1px solid var(--line);box-shadow:-4px 0 16px rgba(0,0,0,.12);padding:16px;overflow:auto;z-index:5}
+#drawer label{display:block;margin:12px 0 4px;font-weight:600}
+#drawer select,#drawer input,#drawer textarea{width:100%}
+#drawer textarea{min-height:140px;border:1px solid var(--line);border-radius:6px;padding:8px;resize:vertical}
+#drawer h2{margin:0;font-size:18px}
+#drawer .top{display:flex;justify-content:space-between;align-items:start;gap:8px}
+:focus-visible{outline:2px solid #2b59c3;outline-offset:1px}
+@media(max-width:700px){.camps{grid-template-columns:1fr}}
+.camps.c3{grid-template-columns:repeat(3,1fr)}.camps.c2{margin-top:10px}
+.card.ext{flex-wrap:wrap}
+.chips{display:flex;flex-wrap:wrap;gap:3px;width:100%;margin-top:4px}
+.chip{font-size:11px;padding:0 6px;border:2px solid var(--c);border-radius:10px;background:#fff;white-space:nowrap}
+.ex{width:100%;font-size:11px;margin-top:4px;white-space:pre-wrap}
+.mk{font-weight:700;color:#9a1b10}
+#err{background:#fde4e1;color:#9a1b10;border:1px solid #f1b5ae;border-radius:6px;padding:8px 10px;margin-bottom:10px}
+#err[hidden]{display:none}
+details{border:1px solid var(--line);border-radius:6px;margin-top:10px}
+summary{cursor:pointer;padding:8px 10px;font-weight:600;background:#f5f6f9}
+.st{padding:8px 10px;border-top:1px solid var(--line)}
+#drawer .st textarea{min-height:60px}
+@media(max-width:700px){.camps.c3{grid-template-columns:1fr}}
+.bd{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:9px;font-weight:700;color:#fff;margin-left:4px;vertical-align:middle}.bd.PR{background:#2f9e5b}.bd.LR{background:#c62828}.chip .bd{width:16px;height:16px;font-size:8px}
+</style>
+</head>
+<body>
+<div id="err" hidden></div>
+<div class="toolbar" id="toolbar"></div>
+<div id="addbox" hidden>
+  <input id="addTheme" list="themeList" placeholder="Thème">
+  <datalist id="themeList"></datalist>
+  <input id="addSous" placeholder="Nom du sous-thème">
+  <button id="addOk" class="on">Créer</button>
+  <button id="addCancel">Annuler</button>
+  <span id="addMsg" class="msg" style="padding:0"></span>
+</div>
+<div id="dash"></div>
+<div id="board"></div>
+<aside id="drawer" hidden></aside>
+<script>
+const POS=[
+ {k:'Beaucoup moins ambitieux',c:'#9a1b10'},{k:'Moins ambitieux',c:'#d9603b'},{k:'Commission',c:'#003399'},
+ {k:'Plus ambitieux',c:'#3f9a6d'},{k:'Beaucoup plus ambitieux',c:'#0c5c3c'}];
+const NI={k:'Non identifié',c:'#aab1bf'};
+const SEUILS={blocageEtats:4,blocagePop:35,qmEtats:15,qmPop:65};
+let rows=[],theme='',sous='',mode5=true,ext=false,openCode=null,TOTAL=0,etats=null,etatsTried=false,openThemes={};
+const norm=s=>(s==null?'':String(s)).trim().toLowerCase();
+const posOf=r=>POS.find(p=>norm(p.k)===norm(r.position))||NI;
+const posKey=r=>posOf(r).k;
+const fmt=x=>x.toFixed(1).replace('.',',');
+const pct=r=>TOTAL?(Number(r.poids)||0)/TOTAL*100:0;
+const uniq=a=>[...new Set(a.filter(Boolean))];
+const mk=n=>{const m=String(n||'').match(/^\s*\((PR|LR)\)|\((PR|LR)\)\s*$/i);return m?(m[1]||m[2]).toUpperCase():''};
+const strip=n=>String(n||'').replace(/^\s*\((PR|LR)\)\s*/i,'').replace(/\s*\((PR|LR)\)\s*$/i,'');
+const withMk=(n,m)=>m?`(${m}) ${strip(n)}`.trim():strip(n);
+const h=(t,a={},...c)=>{const e=document.createElement(t);
+ for(const[k,v]of Object.entries(a)){if(k==='class')e.className=v;else if(k==='style')e.style.cssText=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v)}
+ e.append(...c.flat().filter(x=>x!=null&&x!==false));return e};
+const err=e=>{const b=document.getElementById('err');b.hidden=false;
+ b.textContent='Écriture impossible : '+((e&&e.message)||e)+'. Vérifiez que le widget a l’accès complet au document et que vous avez les droits d’édition.'};
+const back=f=>{const o=grist.mapColumnNamesBack(f);delete o.id;return o};
+const badge=m=>m?h('span',{class:'bd '+m,title:m==='PR'?'Priorité':'Ligne rouge'},m):null;
+const opt=(v,l,sel)=>{const o=h('option',{},l);o.value=v;o.selected=sel;return o};
+
+grist.ready({requiredAccess:'full',columns:[
+ {name:'code',title:'Code État membre',type:'Text'},
+ {name:'etat',title:'État membre',type:'Text'},
+ {name:'poids',title:'Poids (%)',type:'Numeric'},
+ {name:'theme',title:'Thème',type:'Text'},
+ {name:'sousTheme',title:'Sous-thème',type:'Text'},
+ {name:'position',title:'Position',type:'Text,Choice'},
+ {name:'notes',title:'Notes',type:'Text',optional:true},
+ {name:'source',title:'Source',type:'Text',optional:true}]});
+grist.onRecords(recs=>{
+ rows=grist.mapColumnNames(recs)||[];
+ const by={};rows.forEach(r=>{if(r.code&&!(r.code in by))by[r.code]=Number(r.poids)||0});
+ TOTAL=Object.values(by).reduce((a,b)=>a+b,0);
+ render();
+ if(!etatsTried){etatsTried=true;loadEtats().then(()=>{render();if(openCode)renderDrawer()})}
+ if(openCode&&!document.activeElement.closest('#drawer'))renderDrawer();
+});
+
+async function save(id,fields){
+ try{await grist.selectedTable.update({id,fields:back(fields)});
+  const r=rows.find(x=>x.id===id);if(r)Object.assign(r,fields);
+  document.getElementById('err').hidden=true;return true}
+ catch(e){err(e);return false}
+}
+
+// Table des priorités / lignes rouges : détectée par ses colonnes (code, priorités, lignes rouges)
+async function loadEtats(){
+ try{
+  const n=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  for(const t of await grist.docApi.listTables()){
+   const d=await grist.docApi.fetchTable(t),ids=Object.keys(d),f=s=>ids.find(i=>n(i).includes(s));
+   const code=f('codeem')||f('code'),prio=f('priorit'),lig=f('ligne');
+   if(code&&prio&&lig){const by={};(d.id||[]).forEach((id,i)=>{by[d[code][i]]={id,prio:d[prio][i]||'',lig:d[lig][i]||''}});
+    etats={table:t,code,prio,lig,etat:f('etat'),by};return}
+  }
+  etats=null;
+ }catch(e){etats=null}
+}
+async function saveEtat(r,field,val){
+ const col=field==='prio'?etats.prio:etats.lig,cur=etats.by[r.code];
+ try{
+  if(cur)await grist.docApi.applyUserActions([['UpdateRecord',etats.table,cur.id,{[col]:val}]]);
+  else{const f={[etats.code]:r.code,[col]:val};if(etats.etat)f[etats.etat]=r.etat;
+   await grist.docApi.applyUserActions([['AddRecord',etats.table,null,f]])}
+  document.getElementById('err').hidden=true;await loadEtats();render();
+ }catch(e){err(e)}
+}
+
+function stats(cur){const s={};[...POS,NI].forEach(p=>s[p.k]={n:0,pop:0});cur.forEach(r=>{const x=s[posKey(r)];x.n++;x.pop+=pct(r)});return s}
+function statut(n,p){
+ if(n>=SEUILS.qmEtats&&p>=SEUILS.qmPop)return['Majorité qualifiée atteinte','qm'];
+ if(n>=SEUILS.blocageEtats&&p>=SEUILS.blocagePop)return['Minorité de blocage','bl'];
+ return['Ni majorité qualifiée ni minorité de blocage','no']}
+
+function render(){
+ const tb=document.getElementById('toolbar'),dash=document.getElementById('dash'),board=document.getElementById('board');
+ tb.replaceChildren();dash.replaceChildren();board.replaceChildren();
+ if(!rows.length){dash.append(h('div',{class:'msg'},'Aucune donnée. Associez les colonnes dans le panneau de configuration du widget.'));return}
+ const themes=uniq(rows.map(r=>r.theme));
+ if(!themes.includes(theme))theme=themes[0]||'';
+ const sl=uniq(rows.filter(r=>r.theme===theme).map(r=>r.sousTheme));
+ if(sous&&!sl.includes(sous)&&!rows.some(r=>r.theme===theme&&r.sousTheme===sous))sous='';
+ if(!sous)sous=sl[0]||'';
+ const wl=sl.includes(sous)?sl:[...sl,sous].filter(Boolean);
+ tb.append(
+  h('select',{'aria-label':'Thème',onchange:e=>{theme=e.target.value;sous='';closeDrawer();render()}},themes.map(t=>opt(t,t,t===theme))),
+  h('select',{'aria-label':'Sous-thème',onchange:e=>{sous=e.target.value;closeDrawer();render()}},wl.map(t=>opt(t,t,t===sous))),
+  h('button',{onclick:()=>toggleAdd(true,true)},'+ Thème'),
+  h('button',{onclick:()=>toggleAdd(true,false)},'+ Sous-thème'),
+  h('span',{class:'sp'}),
+  h('button',{class:ext?'':'on',onclick:()=>{ext=false;render()}},'Vue compacte'),
+  h('button',{class:ext?'on':'',onclick:()=>{ext=true;render()}},'Vue étendue'),
+  h('span',{style:'width:8px'}),
+  h('button',{class:mode5?'on':'',onclick:()=>{mode5=true;render()}},'5 blocs'),
+  h('button',{class:mode5?'':'on',onclick:()=>{mode5=false;render()}},'3 blocs'));
+
+ const cur=rows.filter(r=>r.theme===theme&&r.sousTheme===sous),st=stats(cur),all=[...POS,NI];
+ const bar=h('div',{class:'bar',role:'img','aria-label':'Poids en population par position'},
+  all.filter(p=>st[p.k].pop>0).map(p=>h('div',{class:'seg'+(p===NI?' ni':''),style:`width:${st[p.k].pop}%;background:${p===NI?'':p.c}`,title:`${p.k} : ${st[p.k].n} États, ${fmt(st[p.k].pop)} %`},st[p.k].pop>=4?fmt(st[p.k].pop)+' %':'')));
+ const legend=h('div',{class:'legend'},all.map(p=>h('span',{},h('i',{style:`background:${p.c}`}),`${p.k} : ${st[p.k].n} (${fmt(st[p.k].pop)} %)`)));
+ const camp=(label,keys,color)=>{
+  const n=keys.reduce((a,k)=>a+st[k].n,0),p=keys.reduce((a,k)=>a+st[k].pop,0),[txt,cls]=statut(n,p);
+  return h('div',{class:'camp',style:`border-left-color:${color}`},h('b',{},label),`${n} États · ${fmt(p)} % de la population`,h('br'),h('span',{class:'tag '+cls},txt))};
+ const K=i=>POS[i].k;
+ dash.append(h('div',{class:'dash'},
+  h('b',{},`${sous||'Aucun sous-thème'} : rapport de force`),h('div',{style:'height:8px'}),bar,legend,
+  h('div',{class:'camps c3'},
+   camp('Moins ambitieux (avec « beaucoup moins »)',[K(0),K(1)],POS[1].c),
+   camp('Proposition de la Commission',[K(2)],POS[2].c),
+   camp('Plus ambitieux (avec « beaucoup plus »)',[K(3),K(4)],POS[3].c)),
+  h('div',{class:'camps c2'},
+   camp('Extrêmes (beaucoup moins + beaucoup plus)',[K(0),K(4)],'#5b4b8a'),
+   camp('Modérés (moins + Commission + plus)',[K(1),K(2),K(3)],'#2a8f9d')),
+  h('div',{class:'legend',style:'margin:8px 0 0'},`Minorité de blocage : ${SEUILS.blocageEtats} États et plus, ${SEUILS.blocagePop} % de la population et plus. Majorité qualifiée : ${SEUILS.qmEtats} États et plus, ${SEUILS.qmPop} % et plus.`)));
+
+ const byCode={};rows.filter(r=>r.theme===theme).forEach(r=>(byCode[r.code]=byCode[r.code]||[]).push(r));
+ const cols=mode5
+  ?[...POS.map(p=>({label:p.k,keys:[p.k],drop:p.k,c:p.c})),{label:NI.k,keys:[NI.k],drop:'',c:NI.c}]
+  :[{label:'Moins ambitieux',keys:[K(0),K(1)],drop:K(1),c:POS[1].c},{label:'Commission',keys:[K(2)],drop:K(2),c:POS[2].c},
+    {label:'Plus ambitieux',keys:[K(3),K(4)],drop:K(3),c:POS[3].c},{label:NI.k,keys:[NI.k],drop:'',c:NI.c}];
+ const card=r=>{
+  const m=mk(r.notes);
+  return h('div',{class:'card'+(ext?' ext':''),draggable:'true',title:'Cliquer pour la fiche, glisser pour changer de position',
+   ondragstart:e=>{e.dataTransfer.setData('text/plain',String(r.id));e.dataTransfer.effectAllowed='move'},
+   onclick:()=>{openCode=r.code;renderDrawer();loadEtats().then(()=>{render();renderDrawer()})}},
+   h('span',{},h('b',{},r.code),' ',r.etat,badge(m),
+    !mode5&&posKey(r).startsWith('Beaucoup')?h('small',{},' · beaucoup'):null,
+    (!ext&&(r.notes||r.source))?h('span',{style:'color:#b7791f',title:'Notes ou source renseignées'},' ●'):null),
+   h('small',{},fmt(pct(r))+' %'),
+   ext?h('div',{class:'chips'},(byCode[r.code]||[]).filter(x=>x.sousTheme!==sous).map(x=>
+    h('span',{class:'chip',style:`--c:${posOf(x).c}`,title:posKey(x)},x.sousTheme,badge(mk(x.notes))))):null,
+   null)};
+ cols.forEach(col=>{
+  const items=cur.filter(r=>col.keys.includes(posKey(r))).sort((a,b)=>pct(b)-pct(a)),p=items.reduce((a,r)=>a+pct(r),0);
+  const el=h('div',{class:'col',style:`--c:${col.c}`},h('h3',{},col.label,h('span',{},`${items.length} · ${fmt(p)} %`)),items.map(card));
+  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('over')});
+  el.addEventListener('dragleave',()=>el.classList.remove('over'));
+  el.addEventListener('drop',async e=>{
+   e.preventDefault();el.classList.remove('over');
+   const id=Number(e.dataTransfer.getData('text/plain')),r=rows.find(x=>x.id===id);
+   if(!r||col.keys.includes(posKey(r)))return;
+   await save(id,{position:col.drop});render();if(openCode)renderDrawer()});
+  board.append(el)});
+ board.className='board';
+}
+
+function closeDrawer(){openCode=null;document.getElementById('drawer').hidden=true}
+function renderDrawer(){
+ const d=document.getElementById('drawer'),base=rows.find(x=>x.code===openCode);
+ if(!base){closeDrawer();return}
+ d.hidden=false;d.replaceChildren();
+ const E=(etats&&etats.by[openCode])||{prio:'',lig:''};
+ const ta=(val,field)=>{const t=h('textarea',{onchange:e=>saveEtat(base,field,e.target.value)});t.value=val;return t};
+ d.append(h('div',{class:'top'},h('div',{},h('h2',{},`${base.etat} (${base.code})`),h('small',{style:'color:var(--mute)'},`${fmt(pct(base))} % de la population`)),
+  h('button',{onclick:closeDrawer},'Fermer')));
+ if(etats)d.append(h('label',{},'Priorités'),ta(E.prio,'prio'),h('label',{},'Lignes rouges'),ta(E.lig,'lig'));
+ else d.append(h('div',{class:'msg'},'Table des priorités et lignes rouges introuvable : créez une table avec les colonnes « Code EM », « Priorités » et « Lignes rouges ».'));
+ const sub=r=>{
+  const m=mk(r.notes);
+  const sp=h('select',{onchange:async e=>{if(await save(r.id,{position:e.target.value}))render()}},[...POS,NI].map(p=>opt(p===NI?'':p.k,p.k,posKey(r)===p.k)));
+  const ms=h('select',{onchange:async e=>{if(await save(r.id,{notes:withMk(r.notes,e.target.value)})){renderDrawer();render()}}},
+   [['','Aucun repère'],['PR','(PR) Priorité'],['LR','(LR) Ligne rouge']].map(([v,l])=>opt(v,l,m===v)));
+  const nt=h('textarea',{onchange:async e=>{if(await save(r.id,{notes:e.target.value}))render()}});nt.value=r.notes||'';
+  const sc=h('input',{onchange:async e=>{if(await save(r.id,{source:e.target.value}))render()}});sc.value=r.source||'';
+  return h('div',{class:'st'},h('b',{},r.sousTheme,badge(m)),h('label',{},'Position'),sp,h('label',{},'Repère'),ms,h('label',{},'Notes'),nt,h('label',{},'Source'),sc)};
+ uniq(rows.map(r=>r.theme)).forEach(t=>{
+  const det=h('details',{},h('summary',{},t));
+  det.open=openThemes[t]!==undefined?openThemes[t]:t===theme;
+  det.addEventListener('toggle',()=>{openThemes[t]=det.open});
+  rows.filter(r=>r.theme===t&&r.code===openCode).forEach(r=>det.append(sub(r)));
+  d.append(det)});
+}
+
+function toggleAdd(show,newTheme){
+ const box=document.getElementById('addbox');box.hidden=!show;
+ if(!show)return;
+ document.getElementById('themeList').replaceChildren(...uniq(rows.map(r=>r.theme)).map(t=>{const o=document.createElement('option');o.value=t;return o}));
+ const at=document.getElementById('addTheme');
+ at.value=newTheme?'':theme;at.placeholder=newTheme?'Nom du nouveau thème':'Thème';
+ document.getElementById('addSous').value='';
+ document.getElementById('addMsg').textContent=newTheme?'Un thème est créé avec son premier sous-thème.':'';
+ (newTheme?at:document.getElementById('addSous')).focus();
+}
+document.getElementById('addCancel').onclick=()=>toggleAdd(false);
+document.getElementById('addOk').onclick=async()=>{
+ const t=document.getElementById('addTheme').value.trim(),s=document.getElementById('addSous').value.trim(),msg=document.getElementById('addMsg');
+ if(!t||!s){msg.textContent='Renseignez le thème et le sous-thème.';return}
+ if(rows.some(r=>r.theme===t&&norm(r.sousTheme)===norm(s))){msg.textContent='Ce sous-thème existe déjà pour ce thème.';return}
+ const states={};rows.forEach(r=>{if(r.code&&!(r.code in states))states[r.code]={code:r.code,etat:r.etat,poids:r.poids}});
+ const recs=Object.values(states).map(x=>({fields:back({...x,theme:t,sousTheme:s,position:''})}));
+ if(!recs.length){msg.textContent='Aucun État membre trouvé dans la table.';return}
+ try{await grist.selectedTable.create(recs);theme=t;sous=s;toggleAdd(false);render()}
+ catch(e){msg.textContent='Échec de la création : '+e.message}
+};
+</script>
+</body>
+</html>
