@@ -204,8 +204,8 @@ function render(){
  const byCode={};rows.filter(r=>r.theme===theme).forEach(r=>(byCode[r.code]=byCode[r.code]||[]).push(r));
  const cols=mode5
   ?[...POS.map(p=>({label:p.k,keys:[p.k],drop:p.k,c:p.c})),{label:NI.k,keys:[NI.k],drop:'',c:NI.c}]
-  :[{label:'Moins ambitieux',keys:[K(0),K(1)],drop:K(1),c:POS[1].c},{label:'Commission',keys:[K(2)],drop:K(2),c:POS[2].c},
-    {label:'Plus ambitieux',keys:[K(3),K(4)],drop:K(3),c:POS[3].c},{label:NI.k,keys:[NI.k],drop:'',c:NI.c}];
+  :[{label:'Beaucoup moins & moins ambitieux',keys:[K(0),K(1)],drop:K(1),c:POS[1].c},{label:'Commission',keys:[K(2)],drop:K(2),c:POS[2].c},
+    {label:'Plus & Beaucoup plus ambitieux',keys:[K(3),K(4)],drop:K(3),c:POS[3].c},{label:NI.k,keys:[NI.k],drop:'',c:NI.c}];
  const card=r=>{
   const m=mk(r.notes);
   return h('div',{class:'card'+(ext?' ext':''),draggable:'true',title:'Cliquer pour la fiche, glisser pour changer de position',
